@@ -52,5 +52,5 @@ jobs:
         with:
           app-name: 'demo-custom-error-pages'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_9BA0A0B176074927B75931FD7662E85F }}
           package: .
