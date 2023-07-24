@@ -1,0 +1,42 @@
+name: Trigger auto deployment for dedicated-app
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/dedicated-app-AutoDeployTrigger-b7420f3b-ec23-476e-986c-bcc2ad124633.yml'
+
+  # Allow mannually trigger 
+  workflow_dispatch:
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.DEDICATEDAPP_AZURE_CREDENTIALS }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          appSourcePath: ${{ github.workspace }} 
+          registryUrl: kokelowo.azurecr.io
+          registryUsername: ${{ secrets.DEDICATEDAPP_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.DEDICATEDAPP_REGISTRY_PASSWORD }}
+          containerAppName: dedicated-app
+          resourceGroup: kokelowo-containers
+          imageToBuild: kokelowo.azurecr.io/dedicated-app:${{ github.sha }}
+          
+
+     
+
