@@ -1,0 +1,47 @@
+name: Trigger auto deployment for khn
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/khn-AutoDeployTrigger-4023054c-f64f-4aa6-8122-ed0a8fe6cdb5.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:      
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions: 
+      id-token: write #This is required for requesting the OIDC JWT Token
+      contents: read #Required when GH token is used to authenticate with private repo
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.KHN_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.KHN_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.KHN_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }} 
+          registryUrl: kokelowo.azurecr.io
+          registryUsername: ${{ secrets.KHN_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.KHN_REGISTRY_PASSWORD }}
+          containerAppName: khn
+          resourceGroup: demoapp88f2
+          imageToBuild: kokelowo.azurecr.io/khn:${{ github.sha }}
+          _buildArgumentsKey_: |
+            _buildArgumentsValues_
+
+
